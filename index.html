@@ -1,0 +1,251 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>GROW UP ポートフォリオ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* レイアウト：暗い閲覧台の中央に本を置き、上下に細いツールバー。読む面を最大化する */
+:root{
+  --stage:#141518;      /* 閲覧台 */
+  --stage-2:#1c1e22;    /* ツールバー */
+  --ink:#e9e7e2;        /* 文字 */
+  --mute:#9a9ca3;       /* 補助文字 */
+  --line:#2d3036;       /* 罫線 */
+  --accent:#f2c94c;     /* しおり色 */
+  --ui:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--stage);color:var(--ink);font-family:var(--ui);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.app{height:100%;display:flex;flex-direction:column}
+
+/* ツールバー */
+.bar{display:flex;align-items:center;gap:12px;min-height:48px;background:var(--stage-2);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+.bar.top{border-bottom:1px solid var(--line)}
+.bar.bottom{border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.title{font-size:13px;font-weight:600;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.title small{color:var(--mute);font-weight:400;margin-left:8px;letter-spacing:.02em}
+.btn{appearance:none;border:1px solid var(--line);background:transparent;color:var(--ink);font:500 12px var(--ui);
+  height:32px;padding:0 12px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:#262930}
+.btn:focus-visible,.nav:focus-visible,input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.count{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:72px;text-align:right}
+input[type=range]{flex:1;min-width:0;accent-color:var(--accent);height:24px;cursor:pointer}
+
+/* 本の置き場 */
+.stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:18px 0}
+.holder{height:100%;margin:0 auto;position:relative}
+#book{width:100%;height:100%}
+.page{background:#f3f2ec;overflow:hidden}
+.page img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
+.page img.lo{filter:blur(2px)}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:88px;border:0;border-radius:8px;
+  background:rgba(255,255,255,.06);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5}
+.nav:hover{background:rgba(255,255,255,.14)}
+.nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav.prev{left:max(8px,env(safe-area-inset-left,0px))}
+.nav.next{right:max(8px,env(safe-area-inset-right,0px))}
+.nav[disabled]{opacity:.25;cursor:default}
+.hint{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--mute);pointer-events:none;transition:opacity .6s}
+
+/* 目次（サムネイル一覧）・拡大表示：入力欄のない表示専用なので Esc で閉じられる */
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(10,11,13,.96);display:flex;flex-direction:column}
+.sheet .bar{background:transparent;border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px 18px;align-content:start;
+  padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.spread{appearance:none;border:0;background:none;color:var(--mute);cursor:pointer;padding:0;display:flex;flex-direction:column;gap:6px;font:12px var(--ui)}
+.spread .imgs{display:flex;justify-content:center;aspect-ratio:1.416;background:#202227;border-radius:3px;overflow:hidden;outline:2px solid transparent;outline-offset:2px}
+.spread .imgs img{height:100%;width:auto;max-width:50%}
+.spread.single .imgs img{max-width:100%}
+.spread:hover .imgs,.spread:focus-visible .imgs{outline-color:#555a63}
+.spread.on .imgs{outline-color:var(--accent)}
+.spread.on{color:var(--ink)}
+.zoomwrap{flex:1;overflow:auto;touch-action:pan-x pan-y pinch-zoom;display:flex}
+.zoomin{margin:auto;display:flex;padding:16px}
+.zoomin img{display:block;height:auto;-webkit-user-drag:none}
+@media (prefers-reduced-motion:reduce){.hint{transition:none}}
+@media (max-width:600px){.title small,.btn .lbl{display:none}.nav{display:none}}
+</style>
+
+<div class="app">
+  <header class="bar top">
+    <div class="title">AI × CREATIVE<small>GROW UP ポートフォリオ</small></div>
+    <button class="btn" id="modeBtn" type="button" aria-label="1ページ表示に切り替え">
+      <svg viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5v14c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-14c-3-.5-6 0-8 1.5zM12 6v14"/></svg><span class="lbl">1ページ表示</span></button>
+    <button class="btn" id="tocBtn" type="button" aria-label="ページ一覧">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7"/><rect x="14" y="4" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span class="lbl">ページ一覧</span></button>
+    <button class="btn" id="zoomBtn" type="button" aria-label="拡大して見る">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg><span class="lbl">拡大</span></button>
+  </header>
+
+  <main class="stage" id="stage">
+    <button class="nav prev" id="prev" type="button" aria-label="前のページ"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="holder" id="holder"><div id="book"></div></div>
+    <button class="nav next" id="next" type="button" aria-label="次のページ"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    <div class="hint" id="hint">ページの端をドラッグ／スワイプ、または ← → キーでめくれます</div>
+  </main>
+
+  <footer class="bar bottom">
+    <input type="range" id="seek" min="0" max="43" value="0" aria-label="ページ位置">
+    <span class="count" id="count">1 / 44</span>
+  </footer>
+</div>
+
+<div class="sheet" id="toc" hidden>
+  <div class="bar"><div class="title">ページ一覧</div><button class="btn" id="tocClose" type="button">閉じる</button></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="sheet" id="zoom" hidden>
+  <div class="bar">
+    <div class="title" id="zoomTitle">拡大表示</div>
+    <button class="btn" id="zOut" type="button" aria-label="縮小">−</button>
+    <button class="btn" id="zIn" type="button" aria-label="拡大">＋</button>
+    <button class="btn" id="zoomClose" type="button">閉じる</button>
+  </div>
+  <div class="zoomwrap" id="zoomwrap"><div class="zoomin" id="zoomin"></div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script>
+(function(){
+  // ページ構成：表紙 → 本文42ページ → 裏表紙
+  var names=["p001_cover"];
+  for(var i=2;i<=43;i++) names.push("p"+String(i).padStart(3,"0"));
+  names.push("p000_back");
+  var N=names.length, W=1275, H=1800, R=W/H;
+  var hi=function(i){return "pages/"+names[i]+".webp"}, lo=function(i){return "thumbs/"+names[i]+".webp"};
+
+  var holder=document.getElementById("holder"), stage=document.getElementById("stage");
+  var els=[], pf=null;
+  // 表示モード：標準は見開き。1ページ表示に切り替えた場合だけ記憶する
+  var mode="spread"; try{ if(localStorage.getItem("bookMode")==="single") mode="single"; }catch(e){}
+  function makeBook(){
+    holder.innerHTML=""; var bk=document.createElement("div"); bk.id="book"; holder.appendChild(bk); els=[];
+    names.forEach(function(n,i){
+      var d=document.createElement("div"); d.className="page";
+      if(i===0||i===N-1) d.setAttribute("data-density","hard");
+      var img=document.createElement("img"); img.alt=(i+1)+"ページ"; img.draggable=false; img.decoding="async";
+      d.appendChild(img); bk.appendChild(d); els.push(img);
+    });
+    return bk;
+  }
+
+  // 近くのページだけ読み込む（軽量化）
+  function load(c){
+    for(var i=Math.max(0,c-8);i<=Math.min(N-1,c+9);i++){
+      var img=els[i], far=Math.abs(i-c)>4;
+      if(!img.dataset.lv){ img.src=lo(i); img.className="lo"; img.dataset.lv="lo"; }
+      if(!far && img.dataset.lv!=="hi"){
+        (function(img,i){ var p=new Image(); p.decoding="async"; p.onload=function(){ img.src=p.src; img.className=""; }; p.src=hi(i); img.dataset.lv="hi"; })(img,i);
+      }
+    }
+  }
+
+  // 本を置く幅：見開きは画面いっぱい、1ページ表示は単ページになる幅に収める
+  function fit(){
+    var aw=stage.clientWidth-(innerWidth>600?120:0);
+    holder.style.width=(mode==="spread"?aw:Math.min(aw,719))+"px";
+  }
+
+  function build(start){
+    if(pf){ try{ pf.destroy(); }catch(e){} }
+    var bk=makeBook(); fit(); load(start);
+    pf=new St.PageFlip(bk,{width:W,height:H,size:"stretch",minWidth:mode==="spread"?60:360,maxWidth:W,
+      minHeight:(mode==="spread"?60:360)/R,maxHeight:H,showCover:true,usePortrait:mode!=="spread",
+      maxShadowOpacity:.45,flippingTime:650,mobileScrollSupport:false,startPage:start,swipeDistance:20});
+    pf.loadFromHTML(bk.querySelectorAll(".page"));
+    pf.on("flip",sync); pf.on("changeOrientation",sync); pf.on("init",sync);
+    // 初回表示で表紙が描画されないことがあるため、読み込み直後に再描画する
+    setTimeout(function(){ fit(); pf.update(); sync(); },60);
+    var mb=document.getElementById("modeBtn");
+    mb.querySelector(".lbl").textContent=mode==="spread"?"1ページ表示":"見開き表示";
+    mb.setAttribute("aria-label",mode==="spread"?"1ページ表示に切り替え":"見開き表示に切り替え");
+  }
+
+  var seek=document.getElementById("seek"), count=document.getElementById("count"), prev=document.getElementById("prev"), next=document.getElementById("next");
+  function visible(){
+    var c=pf.getCurrentPageIndex();
+    if(pf.getOrientation()==="portrait"||c===0||c===N-1) return [c];
+    var a=c%2===1?c:c-1; return [a,a+1].filter(function(x){return x>=0&&x<N});
+  }
+  function sync(){
+    var c=pf.getCurrentPageIndex(), v=visible();
+    load(c);
+    seek.value=c;
+    count.textContent=(v.length>1?(v[0]+1)+"–"+(v[1]+1):(v[0]+1))+" / "+N;
+    prev.disabled=c<=0; next.disabled=v[v.length-1]>=N-1;
+    try{ history.replaceState(null,"","#p"+(v[0]+1)); }catch(e){}
+  }
+  var start=0, m=/^#p(\d+)$/.exec(location.hash); if(m) start=Math.min(N-1,Math.max(0,parseInt(m[1],10)-1));
+  build(start);
+  document.getElementById("modeBtn").onclick=function(){
+    var c=visible()[0];
+    mode=mode==="spread"?"single":"spread";
+    try{ if(mode==="single") localStorage.setItem("bookMode","single"); else localStorage.removeItem("bookMode"); }catch(e){}
+    build(c); hintMsg();
+  };
+
+  prev.onclick=function(){pf.flipPrev()}; next.onclick=function(){pf.flipNext()};
+  seek.oninput=function(){ var v=+seek.value; load(v); pf.turnToPage(v); sync(); };
+  addEventListener("keydown",function(e){
+    if(!document.getElementById("toc").hidden||!document.getElementById("zoom").hidden){ if(e.key==="Escape") closeAll(); return; }
+    if(e.target===seek) return;
+    if(e.key==="ArrowRight"||e.key==="PageDown"){pf.flipNext();e.preventDefault()}
+    if(e.key==="ArrowLeft"||e.key==="PageUp"){pf.flipPrev();e.preventDefault()}
+    if(e.key==="Home"){pf.turnToPage(0);sync()} if(e.key==="End"){pf.turnToPage(N-1);sync()}
+  });
+  var rt; addEventListener("resize",function(){ clearTimeout(rt); rt=setTimeout(function(){fit();pf.update();sync();},80); });
+  function hintMsg(){
+    var h=document.getElementById("hint"), touch=innerWidth<600||matchMedia("(pointer:coarse)").matches;
+    h.textContent = (mode==="spread"&&innerWidth<innerHeight&&innerWidth<700) ? "横向きにすると見開きを大きく表示できます"
+      : touch ? "左右にスワイプしてページをめくれます" : "ページの端をドラッグ／スワイプ、または ← → キーでめくれます";
+    h.style.opacity=1; clearTimeout(hintMsg.t); hintMsg.t=setTimeout(function(){h.style.opacity=0},5000);
+  }
+  hintMsg();
+
+  // ページ一覧
+  var toc=document.getElementById("toc"), grid=document.getElementById("grid"), zoom=document.getElementById("zoom");
+  var groups=[[0]]; for(var g=1;g<N-1;g+=2) groups.push([g,g+1]); groups.push([N-1]);
+  groups.forEach(function(gr){
+    var b=document.createElement("button"); b.type="button"; b.className="spread"+(gr.length===1?" single":"");
+    var box=document.createElement("div"); box.className="imgs";
+    gr.forEach(function(i){ var im=document.createElement("img"); im.loading="lazy"; im.alt=""; im.src=lo(i); box.appendChild(im); });
+    var cap=document.createElement("span"); cap.textContent=gr[0]===0?"表紙":gr[0]===N-1?"裏表紙":(gr[0]+1)+"–"+(gr[1]+1);
+    b.appendChild(box); b.appendChild(cap); b.dataset.p=gr[0];
+    b.onclick=function(){ var p=+b.dataset.p; load(p); pf.turnToPage(p); sync(); closeAll(); };
+    grid.appendChild(b);
+  });
+  document.getElementById("tocBtn").onclick=function(){
+    var c=pf.getCurrentPageIndex();
+    [].forEach.call(grid.children,function(b){ var p=+b.dataset.p; b.classList.toggle("on", p===c||p+1===c); });
+    toc.hidden=false; var on=grid.querySelector(".on"); if(on){ on.scrollIntoView({block:"center"}); on.focus({preventScroll:true}); }
+  };
+
+  // 拡大表示
+  var zin=document.getElementById("zoomin"), zw=document.getElementById("zoomwrap"), z=1;
+  function layoutZoom(){
+    var imgs=zin.querySelectorAll("img"), n=imgs.length;
+    var fitH=zw.clientHeight-32, fitW=(zw.clientWidth-32)/n;
+    var w=Math.min(fitW,fitH*R)*z;
+    imgs.forEach(function(im){ im.style.width=w+"px"; });
+  }
+  document.getElementById("zoomBtn").onclick=function(){
+    var v=visible(); zin.innerHTML="";
+    v.forEach(function(i){ var im=document.createElement("img"); im.src=hi(i); im.alt=(i+1)+"ページ"; im.draggable=false; zin.appendChild(im); });
+    document.getElementById("zoomTitle").textContent=(v.length>1?(v[0]+1)+"–"+(v[1]+1):v[0]+1)+"ページ";
+    z=1; zoom.hidden=false; layoutZoom();
+  };
+  document.getElementById("zIn").onclick=function(){ z=Math.min(4,z*1.5); layoutZoom(); };
+  document.getElementById("zOut").onclick=function(){ z=Math.max(1,z/1.5); layoutZoom(); };
+  zin.ondblclick=function(){ z=z>1?1:2; layoutZoom(); };
+  function closeAll(){ toc.hidden=true; zoom.hidden=true; }
+  document.getElementById("tocClose").onclick=closeAll;
+  document.getElementById("zoomClose").onclick=closeAll;
+  addEventListener("resize",function(){ if(!zoom.hidden) layoutZoom(); });
+})();
+</script>
